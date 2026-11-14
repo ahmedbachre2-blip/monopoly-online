@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MONOPOLY Online</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="lobby-screen" class="screen">
+    <div class="logo-box">
+      <h1>MONOPOLY</h1>
+      <p>Edición Multijugador Online (2 a 6 Jugadores)</p>
+    </div>
+    <div class="lobby-card">
+      <button id="btn-go-create" class="btn-red">CREAR PARTIDA NUEVA</button>
+      <div class="divider">O ÚNETE CON UN CÓDIGO</div>
+      <input type="text" id="room-code-input" placeholder="Código de 6 caracteres" maxlength="6" style="text-transform:uppercase;">
+      <button id="btn-go-join" class="btn-green">CONTINUAR</button>
+      <p id="error-msg" class="error"></p>
+    </div>
+  </div>
+
+  <div id="name-screen" class="screen hidden">
+    <div class="logo-box">
+      <h1>MONOPOLY</h1>
+      <p id="name-screen-subtitle">Configura tu perfil</p>
+    </div>
+    <div class="lobby-card">
+      <label style="font-weight:bold; text-align:center;">Escribe tu nombre de jugador:</label>
+      <input type="text" id="player-name" placeholder="Ej: Carlos" maxlength="14">
+      <button id="btn-confirm-enter" class="btn-green">ENTRAR AL TABLERO</button>
+      <button id="btn-back-lobby" class="btn-gray">VOLVER</button>
+      <p id="name-error-msg" class="error"></p>
+    </div>
+  </div>
+
+  <div id="game-screen" class="screen hidden">
+    <header class="top-bar">
+      <div class="room-badge">SALA: <strong id="display-room-code">------</strong></div>
+      
+      <button id="money-status-btn" class="money-btn">
+        💰 Tu Dinero: <span id="my-money">M1,500</span> | 🏦 Banco: <span id="bank-money">M19,080</span>
+      </button>
+
+      <div class="top-actions">
+        <div class="voice-wrapper">
+          <button id="btn-voice-menu" class="voice-btn">🔇 Voz</button>
+          <div id="voice-dropdown" class="voice-dropdown hidden">
+            <button data-mode="talk">🔊 Escuchar y Hablar</button>
+            <button data-mode="listen">🎧 Solo Escuchar (Silenciado)</button>
+            <button data-mode="off">🔇 No Escuchar ni Hablar</button>
+          </div>
+        </div>
+        <button id="btn-leave-game" class="btn-leave">🚪 Salir</button>
+      </div>
+    </header>
+
+    <div class="players-strip-container">
+      <div class="timer-bar-wrapper">
+        <div id="turn-timer-fill" class="timer-bar-fill"></div>
+        <span id="turn-timer-text">⏳ 30s</span>
+      </div>
+      <div id="players-list-bar" class="players-list-bar"></div>
+      <small class="hint-text">💡 Toca a otro jugador para negociar propiedades o dinero</small>
+    </div>
+
+    <main class="game-container">
+      <div id="board" class="monopoly-board">
+        <div class="board-center">
+          <div class="center-logo">MONOPOLY</div>
+          <div id="turn-indicator" class="turn-box">Esperando jugadores...</div>
+          <div id="dice-display" class="dice-area">🎲 🎲</div>
+          <div class="controls">
+            <button id="btn-start-game" class="btn-green hidden">▶️ INICIAR PARTIDA</button>
+            <button id="btn-roll" class="btn-red hidden">TIRAR DADOS</button>
+            <button id="btn-buy" class="btn-green hidden">COMPRAR</button>
+            <button id="btn-skip" class="btn-gray hidden">NO COMPRAR</button>
+          </div>
+          <div id="game-log" class="log-box">¡Bienvenido a Monopoly!</div>
+        </div>
+      </div>
+
+      <aside class="my-properties-panel">
+        <h3>Tus Propiedades, Casas y Estaciones</h3>
+        <div id="my-properties-list" class="prop-list"></div>
+      </aside>
+    </main>
+  </div><div id="card-modal" class="modal hidden">
+    <div class="title-deed-card">
+      <div id="card-header" class="card-color-bar">TÍTULO DE PROPIEDAD</div>
+      <h2 id="card-title">Nombre</h2>
+      <div class="card-body">
+        <p>Precio: <strong id="card-price">M0</strong></p>
+        <p>Alquiler base: <strong id="card-rent">M0</strong></p>
+        <hr>
+        <small>¡Propiedad añadida a tu cartera!</small>
+      </div>
+      <button id="btn-close-modal" class="btn-red">ACEPTAR</button>
+    </div>
+  </div>
+
+  <div id="event-card-modal" class="modal hidden">
+    <div class="yellow-event-card">
+      <div id="event-card-type" class="event-card-badge">SUERTE</div>
+      <div class="event-card-icon">❓</div>
+      <p id="event-card-text" class="event-card-desc">Texto de la carta</p>
+      <button id="btn-close-event-card" class="btn-red">ENTENDIDO</button>
+    </div>
+  </div>
+
+  <div id="trade-modal" class="modal hidden">
+    <div class="trade-card">
+      <h3>🤝 Negociar con <span id="trade-target-name">Jugador</span></h3>
+      <div class="trade-columns">
+        <div class="trade-col">
+          <h4>Tú Ofreces:</h4>
+          <label>Dinero (M):</label>
+          <input type="number" id="offer-money" value="0" min="0">
+          <label>Tus Propiedades:</label>
+          <div id="offer-props-list" class="checkbox-list"></div>
+        </div>
+        <div class="trade-col">
+          <h4>Tú Pides:</h4>
+          <label>Dinero (M):</label>
+          <input type="number" id="request-money" value="0" min="0">
+          <label>Sus Propiedades:</label>
+          <div id="request-props-list" class="checkbox-list"></div>
+        </div>
+      </div>
+      <div class="trade-actions">
+        <button id="btn-send-trade" class="btn-green">ENVIAR OFERTA</button>
+        <button id="btn-cancel-trade" class="btn-gray">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="incoming-trade-modal" class="modal hidden">
+    <div class="trade-card">
+      <h3>📩 Oferta de <span id="inc-from-name">Jugador</span></h3>
+      <div id="inc-trade-details" class="inc-details"></div>
+      <div class="trade-actions">
+        <button id="btn-accept-trade" class="btn-green">ACEPTAR TRATO</button>
+        <button id="btn-reject-trade" class="btn-red">RECHAZAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="debt-modal" class="modal hidden">
+    <div class="trade-card" style="border-color:#d32f2f;">
+      <h3 style="color:#d32f2f;">⚠️ ¡NO TIENES SUFICIENTE DINERO!</h3>
+      <p id="debt-info" style="margin:10px 0; font-weight:bold;"></p>
+      <p style="font-size:0.85rem; margin-bottom:8px;">Hipoteca propiedades al Banco (recibes el 50% de su valor) o ríndete:</p>
+      <div id="debt-props-list" class="checkbox-list" style="max-height:160px; background:#f5f5f5; padding:8px; border-radius:8px;"></div>
+      <div class="trade-actions" style="margin-top:15px;">
+        <button id="btn-pay-debt" class="btn-green hidden">PAGAR DEUDA AHORA</button>
+        <button id="btn-surrender" class="btn-red">🏳️ RENDIRSE (BANCARROTA)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="auction-modal" class="modal hidden">
+    <div class="trade-card" style="border-color:#f57c00;">
+      <h3 id="auction-title">🔨 SUBASTA DEL BANCO</h3>
+      <p id="auction-subtitle" style="margin:8px 0; font-size:0.9rem;"></p>
+      <div id="auction-timer-badge" style="background:#ffca28; padding:6px; border-radius:8px; font-weight:bold; margin:8px 0;">⏳ 30s</div>
+      <div id="auction-active-box" class="hidden">
+        <div id="auction-prop-card" style="background:#f9f9f9; padding:10px; border-radius:8px; border:2px solid #333; margin:8px 0;">
+          <h4 id="auc-prop-name">Propiedad</h4>
+          <p>Precio original: <strong id="auc-prop-orig">M0</strong></p>
+          <p style="color:#2e7d32; font-size:1.1rem; margin-top:4px;">Puja actual: <strong id="auc-highest-bid">M10</strong> (<span id="auc-highest-bidder">Nadie</span>)</p>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:10px;">
+          <input type="number" id="auc-bid-input" placeholder="Tu oferta (M)" min="10">
+          <button id="btn-place-bid" class="btn-green">PUJAR</button>
+          <button id="btn-pass-bid" class="btn-gray">PASAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
